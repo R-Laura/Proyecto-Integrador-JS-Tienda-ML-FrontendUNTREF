@@ -46,19 +46,26 @@ const contadorItems = document.getElementById('itemCount');
  * - Llamadas a funciones de actualización (5 pts)
  */
 function cargarCarrito() {
-    try {
-        // TODO: Escribe tu código aquí
-        // Ejemplo: const datosGuardados = localStorage.getItem('carrito');
-        
-        
-        console.log('Carrito cargado:', carrito);
-        
-        // TODO: Llamar funciones para actualizar la interfaz
-        
-    } catch (error) {
-        console.error('Error al cargar carrito:', error);
-        carrito = [];
-    }
+  try {
+    // TODO: Escribe tu código aquí
+    // Ejemplo: const datosGuardados = localStorage.getItem('carrito');
+    // Paso 1 : Obtiene los datos del carrito desde localStorage
+    const datosGuardados = localStorage.getItem('carrito');
+
+    // Pasos 2, 3 y 4: Si hay datos los convierte a array, sino usa un array vacío 
+    // y lo guarda en la variable global carrito
+    carrito = datosGuardados ? JSON.parse(datosGuardados) : [];
+
+    console.log('Carrito cargado:', carrito);
+
+    // TODO: Llamar funciones para actualizar la interfaz
+    // Pasos 5 y 6 
+    mostrarProductosCarrito();
+    actualizarResumenCompra();
+  } catch (error) {
+    console.error('Error al cargar carrito:', error);
+    carrito = [];
+  }
 }
 
 // ==========================================
@@ -97,27 +104,113 @@ function cargarCarrito() {
  * - Botones con onclick funcionando (5 pts)
  */
 function mostrarProductosCarrito() {
-    // TODO: Paso 1: Limpiar contenido anterior
-    
-    
-    // TODO: Paso 2: Verificar si el carrito está vacío
-    if (carrito.length === 0) {
-        // Mostrar mensaje de carrito vacío
-        seccionVacia.style.display = 'block';
-        seccionResumen.style.display = 'none';
-        return;
-    }
-    
-    // TODO: Paso 3: Si hay productos, ocultar mensaje vacío
-    seccionVacia.style.display = 'none';
-    seccionResumen.style.display = 'block';
-    
-    // TODO: Paso 4: Recorrer productos y crear elementos
-    carrito.forEach((producto, indice) => {
-        // TODO: Crear elemento para cada producto
-        
-        
-    });
+  // TODO: Paso 1: Limpiar contenido anterior
+  listaCarrito.innerHTML = '';
+
+  // TODO: Paso 2: Verificar si el carrito está vacío
+  if (carrito.length === 0) {
+    // Mostrar mensaje de carrito vacío
+    seccionVacia.style.display = 'block';
+    seccionResumen.style.display = 'none';
+    return;
+  }
+
+  // TODO: Paso 3: Si hay productos, ocultar mensaje vacío
+  seccionVacia.style.display = 'none';
+  seccionResumen.style.display = 'block';
+
+  // TODO: Paso 4: Recorrer productos y crear elementos
+  carrito.forEach((producto, indice) => {
+    // TODO: Crear elemento para cada producto
+    // ============== Con innerHTML ==============
+    /* 
+    listaCarrito.innerHTML += `
+    <div class="cart-item">
+        <img src="${producto.imagen}" alt="${producto.nombre}" class="item-image">
+
+        <div class="item-details">
+        <h3 class="item-title">${producto.nombre}</h3>
+        <p class="item-price">${formatearPrecio(producto.precio)}</p>
+
+        <div class="item-controls">
+            <div class="quantity-controls">
+            <button class="quantity-btn restar" onclick="cambiarCantidad(${indice}, -1)">-</button>
+            <span class="quantity-display">${producto.cantidad}</span>
+            <button class="quantity-btn sumar" onclick="cambiarCantidad(${indice}, 1)">+</button>
+            </div>
+            <button class="remove-item-btn" onclick="eliminarDelCarrito(${indice})">
+                <i class="fa-solid fa-trash"></i> Eliminar
+            </button>
+        </div>
+        </div>
+
+        <div class="item-subtotal">
+        <p class="subtotal-price">${formatearPrecio(producto.precio * producto.cantidad)}</p>
+        <p class="unit-price">Precio por unidad: ${formatearPrecio(producto.precio)}</p>
+        </div>
+    </div>
+    `; 
+    */
+
+    // ============== Con nodos ==============
+    // Contenedor 
+    const div = document.createElement('div');
+    div.classList.add('cart-item');
+
+    // Imagen
+    const imagen = document.createElement('img');
+    imagen.classList.add('item-image');
+    imagen.setAttribute('src', producto.imagen);
+    imagen.setAttribute('alt', producto.nombre);
+
+    // Detalles del producto
+    const divInfo = document.createElement('div');
+    divInfo.classList.add('item-details');
+    const nombre = document.createElement('h3');
+    nombre.classList.add('item-title');
+    nombre.textContent = producto.nombre;
+    const precio = document.createElement('p');
+    precio.classList.add('item-price');
+    precio.textContent = `${formatearPrecio(producto.precio)}`
+
+    // Controles para cantidad y eliminar
+    const divControles = document.createElement('div');
+    divControles.classList.add('item-controls');
+    const divCantidad = document.createElement('div');
+    divCantidad.classList.add('quantity-controls');
+    const botonRestar = document.createElement('button');
+    botonRestar.classList.add('quantity-btn', 'restar');
+    botonRestar.textContent = '-';
+    botonRestar.addEventListener('click', () => cambiarCantidad(indice, -1));
+    const span = document.createElement('span');
+    span.textContent = producto.cantidad
+    const botonSumar = document.createElement('button');
+    botonSumar.classList.add('quantity-btn', 'sumar');
+    botonSumar.textContent = '+';
+    botonSumar.addEventListener('click', () => cambiarCantidad(indice, 1))
+    const botonEliminar = document.createElement('button');
+    botonEliminar.classList.add('remove-item-btn');
+    botonEliminar.innerHTML = `<i class="fa-solid fa-trash"></i> Eliminar`;
+    botonEliminar.addEventListener('click', () => eliminarDelCarrito(indice));
+
+    // Subtotal y precio unitario
+    const divSubtotal = document.createElement('div');
+    divSubtotal.classList.add('item-subtotal');
+    const precioSubtotal = document.createElement('p');
+    precioSubtotal.classList.add('subtotal-price');
+    precioSubtotal.textContent = `${formatearPrecio(producto.precio * producto.cantidad)}`;
+    const precioUnidad = document.createElement('p');
+    precioUnidad.classList.add('unit-price');
+    precioUnidad.textContent = `Precio por unidad: ${formatearPrecio(producto.precio)}`;
+
+    // Vinculación de nodos
+    divCantidad.append(botonRestar, span, botonSumar);
+    divControles.append(divCantidad, botonEliminar);
+    divInfo.append(nombre, precio, divControles);
+    divSubtotal.append(precioSubtotal, precioUnidad);
+    div.append(imagen, divInfo, divSubtotal);
+    listaCarrito.appendChild(div);
+  });
 }
 
 // ==========================================
@@ -147,25 +240,30 @@ function mostrarProductosCarrito() {
  * - Llamadas de actualización de interfaz (3 pts)
  */
 function cambiarCantidad(indice, cambio) {
-    // TODO: Escribe tu código aquí
-    
-    // Paso 1: Verificar índice válido
-    
-    
-    // Paso 2: Calcular nueva cantidad
-    
-    
-    // Paso 3: Manejar cantidad <= 0
-    
-    
-    // Paso 4: Actualizar cantidad
-    
-    
-    // Paso 5: Guardar en localStorage
-    
-    
-    // Paso 6: Actualizar interfaz
-    
+  // TODO: Escribe tu código aquí
+
+  // Paso 1: Verificar índice válido
+  if (indice < 0 || indice > carrito.length - 1) {
+    return
+  }
+
+  // Paso 2: Calcular nueva cantidad
+  const producto = carrito[indice]
+  const nuevaCantidad = producto.cantidad + cambio;
+
+  // Paso 3: Manejar cantidad <= 0
+  if (nuevaCantidad <= 0) {
+    eliminarDelCarrito(indice)
+  } else {
+    producto.cantidad = nuevaCantidad // Paso 4: Actualizar cantidad
+  }
+
+  // Paso 5: Guardar en localStorage
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+
+  // Paso 6: Actualizar interfaz
+  mostrarProductosCarrito();
+  actualizarResumenCompra();
 }
 
 // ==========================================
@@ -188,23 +286,25 @@ function cambiarCantidad(indice, cambio) {
  * - Actualización correcta del DOM (3 pts)
  */
 function actualizarResumenCompra() {
-    // TODO: Paso 1: Calcular subtotal con reduce()
-    // const subtotal = carrito.reduce((total, producto) => {
-    //     return total + (producto.precio * producto.cantidad);
-    // }, 0);
-    
-    
-    // TODO: Paso 2: Contar total de items con reduce()
-    
-    
-    // TODO: Paso 3: Para este examen simplificado, total = subtotal
-    
-    
-    // TODO: Paso 4: Actualizar elementos del DOM
-    // contadorItems.textContent = totalItems;
-    // subtotalElemento.textContent = formatearPrecio(subtotal);
-    // totalElemento.textContent = formatearPrecio(total);
-    
+  // TODO: Paso 1: Calcular subtotal con reduce()
+  const subtotal = carrito.reduce((total, producto) => {
+    return total + (producto.precio * producto.cantidad);
+  }, 0);
+
+
+  // TODO: Paso 2: Contar total de items con reduce()
+  const totalItems = carrito.reduce((total, producto) => {
+    return total + producto.cantidad;
+  }, 0);
+
+  // TODO: Paso 3: Para este examen simplificado, total = subtotal
+  const total = subtotal;
+
+  // TODO: Paso 4: Actualizar elementos del DOM
+  contadorItems.textContent = totalItems;
+  subtotalElemento.textContent = formatearPrecio(subtotal);
+  totalElemento.textContent = formatearPrecio(total);
+
 }
 
 // ==========================================
@@ -227,21 +327,24 @@ function actualizarResumenCompra() {
  * - Actualización de interfaz (3 pts)
  */
 function eliminarDelCarrito(indice) {
-    // TODO: Escribe tu código aquí
-    
-    // Paso 1: Verificar índice válido
-    
-    
-    // Paso 2: Eliminar con splice()
-    
-    
-    // Paso 3: Guardar en localStorage
-    
-    
-    // Paso 4: Actualizar interfaz
-    
-    
-    alert('Producto eliminado del carrito');
+  // TODO: Escribe tu código aquí
+
+  // Paso 1: Verificar índice válido
+  if (indice < 0 || indice > carrito.length - 1) {
+    return
+  }
+
+  // Paso 2: Eliminar con splice()
+  carrito.splice(indice, 1);
+
+  // Paso 3: Guardar en localStorage
+  localStorage.setItem('carrito', JSON.stringify(carrito));
+
+  // Paso 4: Actualizar interfaz
+  mostrarProductosCarrito();
+  actualizarResumenCompra();
+
+  alert('Producto eliminado del carrito');
 }
 
 // ==========================================
@@ -258,16 +361,18 @@ function eliminarDelCarrito(indice) {
  * 4. Actualiza la interfaz
  */
 function vaciarCarrito() {
-    // TODO: Escribe tu código aquí
-    if (confirm('¿Estás seguro de vaciar todo el carrito?')) {
-        // TODO: Vaciar array y localStorage
-        
-        
-        // TODO: Actualizar interfaz
-        
-        
-        alert('Carrito vaciado');
-    }
+  // TODO: Escribe tu código aquí
+  if (confirm('¿Estás seguro de vaciar todo el carrito?')) {
+    // TODO: Vaciar array y localStorage
+    carrito = [];
+    localStorage.removeItem('carrito');
+
+    // TODO: Actualizar interfaz
+    mostrarProductosCarrito();
+    actualizarResumenCompra();
+
+    alert('Carrito vaciado');
+  }
 }
 
 // ==========================================
@@ -279,11 +384,11 @@ function vaciarCarrito() {
  * ESTA FUNCIÓN YA ESTÁ COMPLETA - PUEDES USARLA DIRECTAMENTE
  */
 function formatearPrecio(precio) {
-    return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0
-    }).format(precio);
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(precio);
 }
 
 // ==========================================
@@ -294,19 +399,19 @@ function formatearPrecio(precio) {
  * Esta función se ejecuta cuando se carga la página
  * YA ESTÁ COMPLETA - NO TOCAR
  */
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Cargando página del carrito...');
-    
-    // Cargar carrito al inicio
-    cargarCarrito();
-    
-    // Event listener para botón de vaciar carrito
-    const botonVaciar = document.getElementById('clearCartBtn');
-    if (botonVaciar) {
-        botonVaciar.addEventListener('click', vaciarCarrito);
-    }
-    
-    console.log('Página del carrito cargada');
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('Cargando página del carrito...');
+
+  // Cargar carrito al inicio
+  cargarCarrito();
+
+  // Event listener para botón de vaciar carrito
+  const botonVaciar = document.getElementById('clearCartBtn');
+  if (botonVaciar) {
+    botonVaciar.addEventListener('click', vaciarCarrito);
+  }
+
+  console.log('Página del carrito cargada');
 });
 
 // ==========================================

@@ -41,14 +41,33 @@ const contadorCarrito = document.getElementById('cartCount');
  * - Llamada a mostrarProductos() (2 pts)
  */
 async function cargarProductos() {
-    try {
-        // TODO: Escribe tu código aquí
-        // Ejemplo: const respuesta = await fetch('data/productos.json');
-        
-        
-    } catch (error) {
-        console.error('Error al cargar productos:', error);
-    }
+  try {
+    // TODO: Escribe tu código aquí
+    // Ejemplo: const respuesta = await fetch('data/productos.json');
+    // Paso 1 : Usa fetch() para obtener el archivo 'data/productos.json' 
+    const respuesta = await fetch('../data/productos.json')
+
+    // Paso 2 : Convierte la respuesta a JSON
+    const data = await respuesta.json();
+
+    // Paso 3 : Guarda los productos en la variable 'todosLosProductos'
+    todosLosProductos = data.productos;
+    // console.log(todosLosProductos);
+
+    // Paso 4 : Llama a mostrarProductos() para mostrarlos en pantalla
+    mostrarProductos(todosLosProductos);
+
+    // Cuenta los productos encontrados 
+    const contador = document.getElementById('productsCount');
+    contador.textContent = `${todosLosProductos.length} productos encontrados`
+    contador.classList.remove('loading')
+
+    // Elimina el spinner de carga al final de los productos
+    const estadoCarga = document.querySelector('#loadingState')
+    estadoCarga.style.display = ('none')
+  } catch (error) {
+    console.error('Error al cargar productos:', error);
+  }
 }
 
 // ==========================================
@@ -79,18 +98,117 @@ async function cargarProductos() {
  * - Botón con onclick funcionando (4 pts)
  */
 function mostrarProductos(productos) {
-    // TODO: Escribe tu código aquí
-    // Paso 1: Limpiar contenido anterior
-    
-    
-    // Paso 2: Recorrer array de productos
-    
-    
+  // TODO: Escribe tu código aquí
+  // Paso 1: Limpiar contenido anterior
+  gridProductos.innerHTML = ''
+
+  // Paso 2: Recorrer array de productos
+  productos.forEach(producto => {
+
     // Paso 3: Crear tarjeta para cada producto
-    
-    
+    // ============== Con innerHTML ==============
+    /*
+    gridProductos.innerHTML+= `
+    <div class="product-card">
+        <img src="${producto.imagen}" alt="${producto.nombre}" class="product-image">
+        <h3 class="product-title">${producto.nombre}</h3>
+        <p class="product-price">${formatearPrecio(producto.precio)}</p>
+        <div class="shipping-info">
+            <i class="fa-solid fa-truck"></i> Envío gratis
+        </div>
+        <div class="product-rating">
+            <span class="stars">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </span>
+            <span>5.0 (13)</span>
+        </div>
+        <button class="add-to-cart-btn" onclick="agregarAlCarrito(${producto.id})">Agregar al carrito</button>
+        ${producto.stock > 0 
+            ? `<div class="stock-badge">Stock: ${producto.stock}</div>` 
+            : `<div class="stock-badge out-of-stock">Sin stock</div>`}
+    </div>
+    `
+    */
+
+    // ============== Con nodos ==============
+    // Contenedor tarjeta
+    const contenedor = document.createElement('div');
+    contenedor.classList.add('product-card');
+
+    // Imagen 
+    const imagen = document.createElement('img');
+    imagen.setAttribute('src', producto.imagen);
+    imagen.setAttribute('alt', producto.nombre);
+    imagen.classList.add('product-image');
+    contenedor.appendChild(imagen);
+
+    // Nombre 
+    const nombre = document.createElement('h3');
+    nombre.classList.add('product-title');
+    nombre.textContent = producto.nombre;
+    contenedor.appendChild(nombre);
+
+    // Precio 
+    const precio = document.createElement('p');
+    precio.classList.add('product-price');
+    precio.textContent = `${formatearPrecio(producto.precio)}`;
+    contenedor.appendChild(precio);
+
+    // Envio
+    const envioInfo = document.createElement('div');
+    envioInfo.classList.add('shipping-info');
+    const iconoCamion = document.createElement('i');
+    iconoCamion.classList.add('fa-solid', 'fa-truck');
+    const textoEnvio = document.createTextNode('Envío gratis');
+    envioInfo.appendChild(iconoCamion);
+    envioInfo.appendChild(textoEnvio);
+    contenedor.appendChild(envioInfo);
+
+    // Estrellas
+    const estrellasContenedor = document.createElement('div');
+    estrellasContenedor.classList.add('product-rating');
+    const estrellasSpan = document.createElement('span');
+    estrellasSpan.classList.add('stars', 'product-rating');
+    for (let i = 0; i < 5; i++) {
+      const estrella = document.createElement('i');
+      estrella.classList.add('fa-solid', 'fa-star');
+      estrellasSpan.appendChild(estrella);
+    }
+    estrellasContenedor.appendChild(estrellasSpan);
+    const opiniones = document.createElement('span');
+    opiniones.classList.add('product-rating');
+    opiniones.textContent = '5.0 (13)'
+    estrellasContenedor.appendChild(opiniones)
+    contenedor.appendChild(estrellasContenedor)
+
+    // Boton añadir al carrito
+    const boton = document.createElement('button');
+    boton.classList.add('add-to-cart-btn')
+    boton.addEventListener('click', () => {
+      agregarAlCarrito(producto.id);
+    });
+    boton.textContent = 'Agregar al carrito';
+    contenedor.appendChild(boton);
+
+    // Stock
+    const stock = document.createElement('div');
+    stock.classList.add('stock-badge');
+    if (producto.stock > 0) {
+      stock.textContent = `Stock: ${producto.stock}`;
+    } else {
+      stock.classList.add('out-of-stock');
+      stock.textContent = 'Sin stock';
+    }
+    contenedor.appendChild(stock);
+
+
     // Paso 4: Agregar tarjeta al grid
-    
+    gridProductos.appendChild(contenedor);
+  })
 }
 
 // ==========================================
@@ -116,28 +234,53 @@ function mostrarProductos(productos) {
  * - Actualización del contador (4 pts)
  */
 function agregarAlCarrito(idProducto) {
-    // TODO: Escribe tu código aquí
-    
-    // Paso 1: Buscar el producto
-    // const producto = todosLosProductos.find(p => p.id === idProducto);
-    
-    // Paso 2: Obtener carrito actual de localStorage
-    
-    
-    // Paso 3: Verificar si el producto ya está en el carrito
-    
-    
-    // Paso 4: Agregar o actualizar cantidad
-    
-    
-    // Paso 5: Guardar en localStorage
-    
-    
-    // Paso 6: Actualizar contador
-    
-    
-    // Mensaje de confirmación (opcional)
-    alert('Producto agregado al carrito!');
+  // TODO: Escribe tu código aquí
+
+  // Paso 1: Buscar el producto
+  const producto = todosLosProductos.find(p => p.id === idProducto);
+
+  // Paso 2: Obtener carrito actual de localStorage
+  const carritoActual = JSON.parse(localStorage.getItem('carrito')) || []
+  // console.log('Carrito antes de modificar:', carritoActual)
+
+  // Paso 3: Verificar si el producto ya está en el carrito
+  const productoEnCarrito = carritoActual.find(item => item.id === idProducto)
+
+  // Paso 4: Agregar o actualizar cantidad
+  if (productoEnCarrito) {
+    productoEnCarrito.cantidad += 1;
+  } else {
+    carritoActual.push({
+      ...producto,
+      cantidad: 1
+    })
+  }
+
+  // console.log('Carrito después de modificar:', carritoActual)
+
+  // Paso 5: Guardar en localStorage
+  localStorage.setItem('carrito', JSON.stringify(carritoActual));
+
+  // Paso 6: Actualizar contador
+  actualizarContadorCarrito();
+
+  // Mensaje de confirmación (opcional)
+  // Mostrar y ocultar modal despues de 2 segundos 
+  const modalConfirmacion = document.getElementById('modalOverlay');
+  const toastNotificacion = document.getElementById('toast')
+  modalConfirmacion.style.display = 'flex';
+  toastNotificacion.classList.add('show')
+  setTimeout(() => {
+    modalConfirmacion.style.display = 'none';
+    toastNotificacion.classList.remove('show');
+  }, 2000)
+
+  // Cierre manual del modal
+  const botonSeguirComprando = document.getElementById('continueShoppingBtn');
+  botonSeguirComprando.addEventListener('click', () => {
+    modalConfirmacion.style.display = 'none';
+    toastNotificacion.classList.remove('show');
+  })
 }
 
 // ==========================================
@@ -158,16 +301,18 @@ function agregarAlCarrito(idProducto) {
  * - Actualizar el DOM correctamente (1 pt)
  */
 function actualizarContadorCarrito() {
-    // TODO: Escribe tu código aquí
-    
-    // Paso 1: Obtener carrito de localStorage
-    
-    
-    // Paso 2: Calcular total con reduce()
-    
-    
-    // Paso 3: Mostrar en el contador
-    
+  // TODO: Escribe tu código aquí
+
+  // Paso 1: Obtener carrito de localStorage
+  const carrito = JSON.parse(localStorage.getItem('carrito')) || []
+
+  // Paso 2: Calcular total con reduce()
+  const totalProductos = carrito.reduce((total, item) => {
+    return total + item.cantidad;
+  }, 0)
+
+  // Paso 3: Mostrar en el contador
+  contadorCarrito.textContent = totalProductos;
 }
 
 // ==========================================
@@ -179,11 +324,11 @@ function actualizarContadorCarrito() {
  * ESTA FUNCIÓN YA ESTÁ COMPLETA - PUEDES USARLA DIRECTAMENTE
  */
 function formatearPrecio(precio) {
-    return new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP',
-        minimumFractionDigits: 0
-    }).format(precio);
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(precio);
 }
 
 // ==========================================
@@ -194,16 +339,16 @@ function formatearPrecio(precio) {
  * Esta función se ejecuta cuando se carga la página
  * YA ESTÁ COMPLETA - NO TOCAR
  */
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Cargando tienda...');
-    
-    // Cargar productos al inicio
-    cargarProductos();
-    
-    // Actualizar contador del carrito
-    actualizarContadorCarrito();
-    
-    console.log('Tienda cargada');
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('Cargando tienda...');
+
+  // Cargar productos al inicio
+  cargarProductos();
+
+  // Actualizar contador del carrito
+  actualizarContadorCarrito();
+
+  console.log('Tienda cargada');
 });
 
 // ==========================================
